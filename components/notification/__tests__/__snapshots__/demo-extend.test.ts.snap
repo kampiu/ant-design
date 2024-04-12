@@ -506,6 +506,7 @@ exports[`renders components/notification/demo/render-panel.tsx extend context co
       </div>
     </div>
     <a
+      aria-label="Close"
       class="ant-notification-notice-close"
       tabindex="0"
     >
@@ -552,7 +553,7 @@ exports[`renders components/notification/demo/stack.tsx extend context correctly
           class="ant-space-item"
         >
           <span>
-            Enabled:
+            Enabled: 
           </span>
         </div>
         <div
@@ -592,7 +593,7 @@ exports[`renders components/notification/demo/stack.tsx extend context correctly
           class="ant-space-item"
         >
           <span>
-            Threshold:
+            Threshold: 
           </span>
         </div>
         <div
