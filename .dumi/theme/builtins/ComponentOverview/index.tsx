@@ -1,4 +1,4 @@
-import React, { memo, useContext, useMemo, useRef, useState } from 'react';
+import React, { memo, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Affix, Card, Col, Divider, Flex, Input, Row, Tag, Typography } from 'antd';
@@ -83,7 +83,7 @@ const { Title } = Typography;
 
 const Overview: React.FC = () => {
   const { styles } = useStyle();
-  const { theme } = useContext(SiteContext);
+  const { theme } = React.use(SiteContext);
 
   const data = useSidebarData();
   const [searchBarAffixed, setSearchBarAffixed] = useState<boolean>(false);
@@ -198,44 +198,59 @@ const Overview: React.FC = () => {
                 </Title>
                 <Row gutter={[24, 24]}>
                   {components.map((component) => {
+                    let url = component.link;
                     /** 是否是外链 */
-                    const isExternalLink = component.link.startsWith('http');
-                    let url = `${component.link}`;
+                    const isExternalLink = url.startsWith('http');
 
                     if (!isExternalLink) {
                       url += urlSearch;
                     }
 
-                    return (
-                      <Col xs={24} sm={12} lg={8} xl={6} key={component?.title}>
-                        <Link to={url}>
-                          <Card
-                            onClick={() => onClickCard(url)}
-                            bodyStyle={{
-                              backgroundRepeat: 'no-repeat',
-                              backgroundPosition: 'bottom right',
-                              backgroundImage: `url(${component?.tag || ''})`,
-                            }}
-                            size="small"
-                            className={styles.componentsOverviewCard}
-                            title={
-                              <div className={styles.componentsOverviewTitle}>
-                                {component?.title} {component.subtitle}
-                              </div>
+                    const cardContent = (
+                      <Card
+                        key={component.title}
+                        onClick={() => onClickCard(url)}
+                        styles={{
+                          body: {
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'bottom right',
+                            backgroundImage: `url(${component.tag || ''})`,
+                          },
+                        }}
+                        size="small"
+                        className={styles.componentsOverviewCard}
+                        title={
+                          <div className={styles.componentsOverviewTitle}>
+                            {component.title} {component.subtitle}
+                          </div>
+                        }
+                      >
+                        <div className={styles.componentsOverviewImg}>
+                          <img
+                            src={
+                              theme.includes('dark') && component.coverDark
+                                ? component.coverDark
+                                : component.cover
                             }
-                          >
-                            <div className={styles.componentsOverviewImg}>
-                              <img
-                                src={
-                                  theme.includes('dark') && component.coverDark
-                                    ? component.coverDark
-                                    : component.cover
-                                }
-                                alt={component?.title}
-                              />
-                            </div>
-                          </Card>
-                        </Link>
+                            alt={component.title}
+                          />
+                        </div>
+                      </Card>
+                    );
+
+                    const linkContent = isExternalLink ? (
+                      <a href={url} key={component.title}>
+                        {cardContent}
+                      </a>
+                    ) : (
+                      <Link to={url} key={component.title}>
+                        {cardContent}
+                      </Link>
+                    );
+
+                    return (
+                      <Col xs={24} sm={12} lg={8} xl={6} key={component.title}>
+                        {linkContent}
                       </Col>
                     );
                   })}

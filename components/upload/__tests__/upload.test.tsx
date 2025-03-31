@@ -38,7 +38,7 @@ describe('Upload', () => {
 
   // https://github.com/react-component/upload/issues/36
   it('should get refs inside Upload in componentDidMount', () => {
-    let ref: React.RefObject<HTMLInputElement>;
+    let ref: React.RefObject<HTMLInputElement | null>;
     const App: React.FC = () => {
       const inputRef = useRef<HTMLInputElement>(null);
       useEffect(() => {
@@ -341,14 +341,8 @@ describe('Upload', () => {
       const file = { uid: '-3', name: 'item3.jpg' };
       const fileList = produce(
         [
-          {
-            uid: '-1',
-            name: 'item.jpg',
-          },
-          {
-            uid: '-2',
-            name: 'item2.jpg',
-          },
+          { uid: '-1', name: 'item.jpg' },
+          { uid: '-2', name: 'item2.jpg' },
         ],
         (draftState) => {
           draftState.push({
@@ -460,7 +454,7 @@ describe('Upload', () => {
       url: 'http://www.baidu.com/xxx.png',
     };
 
-    let removePromise: (value: boolean | Promise<void | boolean>) => void;
+    let removePromise: (value: boolean | Promise<undefined | boolean>) => void;
 
     const onRemove: UploadProps['onRemove'] = () =>
       new Promise((resolve) => {
@@ -630,7 +624,7 @@ describe('Upload', () => {
 
     const customRequest = jest.fn(async (options) => {
       // stop here to make sure new fileList has been set and passed to Upload
-      // eslint-disable-next-line no-promise-executor-return
+
       await new Promise((resolve) => setTimeout(resolve, 0));
       options.onProgress({ percent: 0 });
       const url = Promise.resolve('https://ant.design');
@@ -1042,7 +1036,7 @@ describe('Upload', () => {
 
     const customRequest = jest.fn(async (options) => {
       // stop here to make sure new fileList has been set and passed to Upload
-      // eslint-disable-next-line no-promise-executor-return
+
       await new Promise((resolve) => setTimeout(resolve, 0));
       options.onProgress({ percent: 0 });
       const url = Promise.resolve<string>('https://ant.design');
@@ -1081,5 +1075,12 @@ describe('Upload', () => {
     fileListOut.forEach((file) => {
       expect(file.status).toBe('done');
     });
+  });
+
+  it('container ref', () => {
+    const ref = React.createRef<any>();
+    render(<Upload ref={ref} />);
+    expect(ref.current?.nativeElement).toBeTruthy();
+    expect(ref.current?.nativeElement instanceof HTMLElement).toBeTruthy();
   });
 });

@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
 import React from 'react';
-import { Col, ConfigProvider, Flex, Row, Tag, theme, Typography } from 'antd';
+import { Col, ConfigProvider, Flex, Row, Tag, theme, Typography, Popover } from 'antd';
 import { createStyles, css } from 'antd-style';
 import classnames from 'classnames';
 
@@ -43,7 +44,7 @@ const useStyle = createStyles(({ token }, markPos: [number, number, number, numb
     z-index: 999999;
     box-shadow: 0 0 0 1px #fff;
     pointer-events: none;
-    left: ${markPos[0] - MARK_BORDER_SIZE}px;
+    inset-inline-start: ${markPos[0] - MARK_BORDER_SIZE}px;
     top: ${markPos[1] - MARK_BORDER_SIZE}px;
     width: ${markPos[2] + MARK_BORDER_SIZE * 2}px;
     height: ${markPos[3] + MARK_BORDER_SIZE * 2}px;
@@ -65,13 +66,14 @@ const useStyle = createStyles(({ token }, markPos: [number, number, number, numb
 }));
 
 export interface SemanticPreviewProps {
+  componentName: string;
   semantics: { name: string; desc: string; version?: string }[];
-  children: React.ReactElement;
+  children: React.ReactElement<any>;
   height?: number;
 }
 
 const SemanticPreview: React.FC<SemanticPreviewProps> = (props) => {
-  const { semantics = [], children, height } = props;
+  const { semantics = [], children, height, componentName = 'Component' } = props;
   const { token } = theme.useToken();
 
   // ======================= Semantic =======================
@@ -97,7 +99,7 @@ const SemanticPreview: React.FC<SemanticPreviewProps> = (props) => {
   // ======================== Hover =========================
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = React.useRef<ReturnType<typeof setTimeout>>(null);
 
   const [positionMotion, setPositionMotion] = React.useState<boolean>(false);
   const [hoverSemantic, setHoverSemantic] = React.useState<string | null>(null);
@@ -111,12 +113,14 @@ const SemanticPreview: React.FC<SemanticPreviewProps> = (props) => {
       const targetElement = containerRef.current?.querySelector<HTMLElement>(`.${targetClassName}`);
       const containerRect = containerRef.current?.getBoundingClientRect();
       const targetRect = targetElement?.getBoundingClientRect();
+
       setMarkPos([
         (targetRect?.left || 0) - (containerRect?.left || 0),
         (targetRect?.top || 0) - (containerRect?.top || 0),
         targetRect?.width || 0,
         targetRect?.height || 0,
       ]);
+
       timerRef.current = setTimeout(() => {
         setPositionMotion(true);
       }, 10);
@@ -142,24 +146,45 @@ const SemanticPreview: React.FC<SemanticPreviewProps> = (props) => {
         <Col span={8}>
           <ul className={classnames(styles.listWrap)}>
             {semantics.map<React.ReactNode>((semantic) => (
-              <li
+              <Popover
                 key={semantic.name}
-                className={classnames(styles.listItem)}
-                onMouseEnter={() => setHoverSemantic(semantic.name)}
-                onMouseLeave={() => setHoverSemantic(null)}
+                content={
+                  <Typography style={{ fontSize: 12, minWidth: 300 }}>
+                    <pre dir="ltr">
+                      <code dir="ltr">
+                        {`<${componentName}
+  classNames={{
+    ${semantic.name}: 'my-${componentName.toLowerCase()}',
+  }}
+  styles={{
+    ${semantic.name}: { color: 'red' },
+  }}
+>
+  ...
+</${componentName}>`}
+                      </code>
+                    </pre>
+                  </Typography>
+                }
               >
-                <Flex vertical gap="small">
-                  <Flex gap="small" align="center">
-                    <Typography.Title level={5} style={{ margin: 0 }}>
-                      {semantic.name}
-                    </Typography.Title>
-                    {semantic.version && <Tag color="blue">{semantic.version}</Tag>}
+                <li
+                  className={classnames(styles.listItem)}
+                  onMouseEnter={() => setHoverSemantic(semantic.name)}
+                  onMouseLeave={() => setHoverSemantic(null)}
+                >
+                  <Flex vertical gap="small">
+                    <Flex gap="small" align="center">
+                      <Typography.Title level={5} style={{ margin: 0 }}>
+                        {semantic.name}
+                      </Typography.Title>
+                      {semantic.version && <Tag color="blue">{semantic.version}</Tag>}
+                    </Flex>
+                    <Typography.Paragraph style={{ margin: 0, fontSize: token.fontSizeSM }}>
+                      {semantic.desc}
+                    </Typography.Paragraph>
                   </Flex>
-                  <Typography.Paragraph style={{ margin: 0, fontSize: token.fontSizeSM }}>
-                    {semantic.desc}
-                  </Typography.Paragraph>
-                </Flex>
-              </li>
+                </li>
+              </Popover>
             ))}
           </ul>
         </Col>

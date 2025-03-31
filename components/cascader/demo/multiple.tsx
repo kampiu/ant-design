@@ -1,6 +1,6 @@
 import React from 'react';
+import type { CascaderProps } from 'antd';
 import { Cascader } from 'antd';
-import type { MultipleCascaderProps } from 'antd/es/cascader';
 
 interface Option {
   value: string | number;
@@ -13,9 +13,10 @@ const options: Option[] = [
   {
     label: 'Light',
     value: 'light',
-    children: new Array(20)
-      .fill(null)
-      .map((_, index) => ({ label: `Number ${index}`, value: index })),
+    children: Array.from({ length: 20 }).map((_, index) => ({
+      label: `Number ${index}`,
+      value: index,
+    })),
   },
   {
     label: 'Bamboo',
@@ -44,7 +45,7 @@ const options: Option[] = [
   },
 ];
 
-const onChange: MultipleCascaderProps<Option>['onChange'] = (value) => {
+const onChange: CascaderProps<Option, 'value', true>['onChange'] = (value) => {
   console.log(value);
 };
 

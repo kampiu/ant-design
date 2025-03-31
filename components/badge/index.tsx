@@ -15,7 +15,8 @@ import useStyle from './style';
 
 export type { ScrollNumberProps } from './ScrollNumber';
 
-export interface BadgeProps {
+type SemanticName = 'root' | 'indicator';
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Number to show in badge */
   count?: React.ReactNode;
   showZero?: boolean;
@@ -35,14 +36,8 @@ export interface BadgeProps {
   offset?: [number | string, number | string];
   title?: string;
   children?: React.ReactNode;
-  classNames?: {
-    root?: string;
-    indicator?: string;
-  };
-  styles?: {
-    root?: React.CSSProperties;
-    indicator?: React.CSSProperties;
-  };
+  classNames?: Partial<Record<SemanticName, string>>;
+  styles?: Partial<Record<SemanticName, React.CSSProperties>>;
 }
 
 const InternalBadge = React.forwardRef<HTMLSpanElement, BadgeProps>((props, ref) => {
@@ -216,7 +211,7 @@ const InternalBadge = React.forwardRef<HTMLSpanElement, BadgeProps>((props, ref)
         motionAppear={false}
         motionDeadline={1000}
       >
-        {({ className: motionClassName, ref: scrollNumberRef }) => {
+        {({ className: motionClassName }) => {
           const scrollNumberPrefixCls = getPrefixCls(
             'scroll-number',
             customizeScrollNumberPrefixCls,
@@ -255,7 +250,6 @@ const InternalBadge = React.forwardRef<HTMLSpanElement, BadgeProps>((props, ref)
               title={titleNode}
               style={scrollNumberStyle}
               key="scrollNumber"
-              ref={scrollNumberRef}
             >
               {displayNode}
             </ScrollNumber>

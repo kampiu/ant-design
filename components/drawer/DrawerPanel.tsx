@@ -4,7 +4,8 @@ import type { DrawerProps as RCDrawerProps } from 'rc-drawer';
 
 import useClosable, { pickClosable } from '../_util/hooks/useClosable';
 import type { ClosableType } from '../_util/hooks/useClosable';
-import { ConfigContext } from '../config-provider';
+import Skeleton from '../skeleton';
+import { useComponentConfig } from '../config-provider/context';
 
 export interface DrawerClassNames extends NonNullable<RCDrawerProps['classNames']> {
   header?: string;
@@ -38,6 +39,7 @@ export interface DrawerPanelProps {
   children?: React.ReactNode;
   classNames?: DrawerClassNames;
   styles?: DrawerStyles;
+  loading?: boolean;
 
   /** @deprecated Please use `styles.header` instead */
   headerStyle?: React.CSSProperties;
@@ -59,6 +61,7 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
     title,
     footer,
     extra,
+    loading,
     onClose,
     headerStyle,
     bodyStyle,
@@ -67,7 +70,7 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
     classNames: drawerClassNames,
     styles: drawerStyles,
   } = props;
-  const { drawer: drawerContext } = React.useContext(ConfigContext);
+  const drawerContext = useComponentConfig('drawer');
 
   const customCloseIconRender = React.useCallback(
     (icon: React.ReactNode) => (
@@ -94,7 +97,7 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
     return (
       <div
         style={{
-          ...drawerContext?.styles?.header,
+          ...drawerContext.styles?.header,
           ...headerStyle,
           ...drawerStyles?.header,
         }}
@@ -103,7 +106,7 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
           {
             [`${prefixCls}-header-close-only`]: mergedClosable && !title && !extra,
           },
-          drawerContext?.classNames?.header,
+          drawerContext.classNames?.header,
           drawerClassNames?.header,
         )}
       >
@@ -125,11 +128,11 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
       <div
         className={classNames(
           footerClassName,
-          drawerContext?.classNames?.footer,
+          drawerContext.classNames?.footer,
           drawerClassNames?.footer,
         )}
         style={{
-          ...drawerContext?.styles?.footer,
+          ...drawerContext.styles?.footer,
           ...footerStyle,
           ...drawerStyles?.footer,
         }}
@@ -146,15 +149,20 @@ const DrawerPanel: React.FC<DrawerPanelProps> = (props) => {
         className={classNames(
           `${prefixCls}-body`,
           drawerClassNames?.body,
-          drawerContext?.classNames?.body,
+          drawerContext.classNames?.body,
         )}
-        style={{
-          ...drawerContext?.styles?.body,
-          ...bodyStyle,
-          ...drawerStyles?.body,
-        }}
+        style={{ ...drawerContext.styles?.body, ...bodyStyle, ...drawerStyles?.body }}
       >
-        {children}
+        {loading ? (
+          <Skeleton
+            active
+            title={false}
+            paragraph={{ rows: 5 }}
+            className={`${prefixCls}-body-skeleton`}
+          />
+        ) : (
+          children
+        )}
       </div>
       {footerNode}
     </>

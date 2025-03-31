@@ -42,7 +42,6 @@ describe('Table', () => {
           <Column title="Last Name" dataIndex="lastName" key="lastName" />
         </ColumnGroup>
         <Column title="Age" dataIndex="age" key="age" />
-        {/* eslint-disable-next-line react/jsx-curly-brace-presence */}
         {'invalid child'}
       </Table>,
     );
@@ -407,7 +406,7 @@ describe('Table', () => {
 
     expect(tblRef.current).toHaveClass('ant-table-wrapper');
     expect(tblRef.current?.nativeElement).toBe(wrapDom);
-    expect(tblRef.current?.scrollTo instanceof Function).toBeTruthy();
+    expect(typeof tblRef.current?.scrollTo === 'function').toBeTruthy();
   });
 
   it('support hidden columns', () => {

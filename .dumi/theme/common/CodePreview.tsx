@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
 import type { ComponentProps } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { Button, Tabs, Typography } from 'antd';
@@ -6,6 +7,7 @@ import toReactElement from 'jsonml-to-react-element';
 import JsonML from 'jsonml.js/lib/utils';
 import Prism from 'prismjs';
 
+import DemoContext from '../slots/DemoContext';
 import LiveCode from './LiveCode';
 
 const useStyle = createStyles(({ token, css }) => {
@@ -39,9 +41,9 @@ const useStyle = createStyles(({ token, css }) => {
           display: block;
           position: absolute;
           top: -5px;
-          left: -9px;
+          inset-inline-start: -9px;
           bottom: -5px;
-          right: -9px;
+          inset-inline-end: -9px;
         }
       }
       ${antCls}-typography-copy:not(${antCls}-typography-copy-success) {
@@ -67,7 +69,6 @@ interface CodePreviewProps
   jsxCode?: string;
   styleCode?: string;
   entryName: string;
-  onCodeTypeChange?: (activeKey: string) => void;
   onSourceChange?: (source: Record<string, string>) => void;
 }
 
@@ -79,6 +80,7 @@ function toReactComponent(jsonML: any[]) {
         const attr = JsonML.getAttributes(node);
         return (
           <pre key={index} className={`language-${attr.lang}`}>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: it's for markdown */}
             <code dangerouslySetInnerHTML={{ __html: attr.highlighted }} />
           </pre>
         );
@@ -92,7 +94,6 @@ const CodePreview: React.FC<CodePreviewProps> = ({
   jsxCode = '',
   styleCode = '',
   entryName,
-  onCodeTypeChange,
   onSourceChange,
   error,
 }) => {
@@ -108,6 +109,7 @@ const CodePreview: React.FC<CodePreviewProps> = ({
     initialCodes.style = '';
   }
   const [highlightedCodes, setHighlightedCodes] = React.useState(initialCodes);
+  const { codeType, setCodeType } = React.use(DemoContext);
   const sourceCodes = {
     // omit trailing line break
     tsx: sourceCode?.trim(),
@@ -178,7 +180,15 @@ const CodePreview: React.FC<CodePreviewProps> = ({
     );
   }
 
-  return <Tabs centered className="highlight" onChange={onCodeTypeChange} items={items} />;
+  return (
+    <Tabs
+      centered
+      className="highlight"
+      activeKey={codeType}
+      onChange={setCodeType}
+      items={items}
+    />
+  );
 };
 
 export default CodePreview;
